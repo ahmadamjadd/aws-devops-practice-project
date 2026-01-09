@@ -9,14 +9,26 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
+      
+      # 1. Build using the correct local name
       - docker build -t my-python-repo .
-      - docker tag my-python-app:latest 886108961510.dkr.ecr.ap-south-1.amazonaws.com/my-python-app:latest
+      
+      # 2. Tag using the correct ECR repo name (my-python-repo)
+      - docker tag my-python-repo:latest 886108961510.dkr.ecr.ap-south-1.amazonaws.com/my-python-repo:latest
+      
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push 886108961510.dkr.ecr.ap-south-1.amazonaws.com/my-python-app:latest
+      
+      # 3. Push to the correct ECR repo
+      - docker push 886108961510.dkr.ecr.ap-south-1.amazonaws.com/my-python-repo:latest
+      
       - echo Writing image definitions file...
-      - printf '[{"name":"python-container","imageUri":"886108961510.dkr.ecr.ap-south-1.amazonaws.com/my-python-app:latest"}]' > imagedefinitions.json
+      # CRITICAL: 
+      # "name" matches your Terraform Task Definition ("my-python-container")
+      # "imageUri" matches the repo you just pushed to (".../my-python-repo:latest")
+      - printf '[{"name":"my-python-container","imageUri":"886108961510.dkr.ecr.ap-south-1.amazonaws.com/my-python-repo:latest"}]' > imagedefinitions.json
+
 artifacts:
     files: imagedefinitions.json
