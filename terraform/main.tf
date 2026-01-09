@@ -259,7 +259,7 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        # 1. S3 Permission (The "Hand-off Zone")
+        # 1. S3 Permission (Artifacts)
         Effect = "Allow"
         Action = [
           "s3:GetObject",
@@ -274,7 +274,7 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
         ]
       },
       {
-        # 2. CodeBuild Permission (To start the worker)
+        # 2. CodeBuild Permission (Build Project)
         Effect = "Allow"
         Action = [
           "codebuild:BatchGetBuilds",
@@ -283,12 +283,33 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
         Resource = "*" 
       },
       {
-        # 3. Connection Permission (To talk to GitHub)
+        # 3. Connection Permission (GitHub)
         Effect = "Allow"
         Action = [
           "codestar-connections:UseConnection"
         ]
         Resource = aws_codestarconnections_connection.github-connection.arn
+      },
+      {
+        # 4. ECS Permission (Deploy Stage) --- THIS IS NEW! ---
+        Effect = "Allow"
+        Action = [
+          "ecs:DescribeServices",
+          "ecs:DescribeTaskDefinition",
+          "ecs:DescribeTasks",
+          "ecs:ListTasks",
+          "ecs:RegisterTaskDefinition",
+          "ecs:UpdateService"
+        ]
+        Resource = "*"
+      },
+      {
+        # 5. IAM PassRole (Required to assign the execution role to the new task)
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole"
+        ]
+        Resource = "*"
       }
     ]
   })
