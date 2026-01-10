@@ -1,4 +1,4 @@
-# AWS DevOps Practice: End-to-End CI/CD with Terraform & ECS Fargate
+# AWS DevOps: End-to-End CI/CD with Terraform & ECS Fargate
 
 ## 🚀 Project Overview
 This project demonstrates a fully automated **Infrastructure as Code (IaC)** deployment using **Terraform**. It sets up a complete CI/CD pipeline on AWS to build, secure, and deploy a containerized Python application to **Amazon ECS (Elastic Container Service)** using the **Fargate** serverless launch type.
