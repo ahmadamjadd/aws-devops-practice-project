@@ -4,31 +4,21 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 886108961510.dkr.ecr.ap-south-1.amazonaws.com
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      
-      # 1. Build using the correct local name
-      - docker build -t my-python-repo .
-      
-      # 2. Tag using the correct ECR repo name (my-python-repo)
-      - docker tag my-python-repo:latest 886108961510.dkr.ecr.ap-south-1.amazonaws.com/my-python-repo:latest
-      
+      - docker build -t $IMAGE_REPO_NAME .
+      - docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      
-      # 3. Push to the correct ECR repo
-      - docker push 886108961510.dkr.ecr.ap-south-1.amazonaws.com/my-python-repo:latest
-      
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
       - echo Writing image definitions file...
-      # CRITICAL: 
-      # "name" matches your Terraform Task Definition ("my-python-container")
-      # "imageUri" matches the repo you just pushed to (".../my-python-repo:latest")
-      - printf '[{"name":"my-python-container","imageUri":"886108961510.dkr.ecr.ap-south-1.amazonaws.com/my-python-repo:latest"}]' > imagedefinitions.json
+      
+      - printf '[{"name":"%s","imageUri":"%s"}]' "$CONTAINER_NAME" "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest" > imagedefinitions.json
 
 artifacts:
     files: imagedefinitions.json
